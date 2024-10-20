@@ -9,28 +9,36 @@
     <h1>Send Location</h1>
     <button onclick="sendLocation()">Send My Location</button>
 
-    <script>
-        function sendLocation() {
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    const latitude = position.coords.latitude;
-                    const longitude = position.coords.longitude;
+<script>
+    function sendLocation() {
+        console.log("Button clicked");
+        if ("geolocation" in navigator) {
+            console.log("Geolocation is available");
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+                console.log("Position obtained:", latitude, longitude);
 
-                    fetch('http://117.7.116.182:3000/location', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ latitude, longitude }),
-                    })
-                    .then(response => response.json())
-                    .then(data => console.log('Success:', data))
-                    .catch((error) => console.error('Error:', error));
-                });
-            } else {
-                console.log("Geolocation is not supported by this browser.");
-            }
+                fetch('http://117.7.116.182:3000/location', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ latitude, longitude }),
+                })
+                .then(response => {
+                    console.log("Response status:", response.status);
+                    return response.json();
+                })
+                .then(data => console.log('Success:', data))
+                .catch((error) => console.error('Error:', error));
+            }, function(error) {
+                console.error("Error getting position:", error.message);
+            });
+        } else {
+            console.log("Geolocation is not supported by this browser.");
         }
-    </script>
+    }
+</script>
 </body>
 </html>
