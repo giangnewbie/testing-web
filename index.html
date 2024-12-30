@@ -2,43 +2,762 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Location Sender</title>
+    <title>Typing Practice</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00ff88;
+            --secondary: #7000ff;
+            --dark: #0a0a0a;
+            --text: #ffffff;
+            --error: #ff3366;
+            --background: #121212;
+            --card-bg: #1e1e1e;
+            --border-radius: 10px;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e1e1e, #121212);
+            color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 20% 20%, rgba(0, 255, 136, 0.1) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 80%, rgba(112, 0, 255, 0.1) 0%, transparent 40%);
+            animation: backgroundMove 20s ease infinite;
+        }
+
+        @keyframes backgroundMove {
+            0%, 100% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 2.5rem;
+            max-width: 900px;
+            width: 100%;
+            margin: 1rem auto;
+            animation: fadeIn 1s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            animation: slideDown 1s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            color: var(--primary);
+            animation: titleGlow 2s ease infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            0% { text-shadow: 0 0 10px var(--primary); }
+            100% { text-shadow: 0 0 20px var(--secondary); }
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: var(--secondary);
+        }
+
+        .input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: center;
+            width: 100%;
+        }
+
+        textarea, input {
+            width: 90%;
+            padding: 1rem;
+            border: 2px solid var(--primary);
+            border-radius: var(--border-radius);
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            font-size: 1rem;
+            resize: none;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            height: 120px;
+            margin: 0 auto;
+        }
+
+        input {
+            height: 50px;
+        }
+
+        textarea:focus, input:focus {
+            background-color: rgba(255, 255, 255, 0.2);
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        textarea::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        textarea::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        textarea::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+            border: 3px solid rgba(0, 0, 0, 0.3);
+        }
+
+        textarea::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+
+        .text-box {
+            position: relative;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            max-height: 200px;
+            overflow-y: auto;
+            width: 90%;
+            margin: 0 auto;
+            text-align: left;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            white-space: pre-line;
+            transition: filter 0.3s ease;
+        }
+
+        .word {
+            display: inline-block;
+            margin: 0 2px;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+            line-height: 1.8;
+        }
+
+        .word.correct {
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .word.incorrect {
+            color: var(--error);
+            text-shadow: 0 0 10px var(--error);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+
+        .button {
+            background-color: var(--card-bg);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            border-radius: var(--border-radius);
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            height: 50px;
+            width: 100px;
+        }
+
+        .button:hover {
+            background-color: var(--primary);
+            color: var(--dark);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .clock-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(30, 30, 30, 0.8);
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+            border: 1px solid rgba(0, 255, 136, 0.1);
+        }
+
+        .clock {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .weather-icon {
+            font-size: 2rem;
+            color: var(--secondary);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px var(--secondary); }
+            to { text-shadow: 0 0 15px var(--secondary); }
+        }
+
+        .blur-text {
+            filter: blur(4px);
+            user-select: none;
+        }
+
+        .toggle-blur {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+        }
+
+        .toggle-blur:hover {
+            color: var(--secondary);
+        }
+
+        .text-box, #input-text {
+            transition: filter 0.3s ease;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -240px;
+            width: 220px;
+            height: 100%;
+            background: linear-gradient(
+                135deg,
+                rgba(30, 30, 30, 0.95),
+                rgba(20, 20, 20, 0.95)
+            );
+            padding: 1.5rem;
+            box-shadow: 5px 0 15px rgba(0, 255, 136, 0.1);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-right: 1px solid rgba(0, 255, 136, 0.1);
+        }
+
+        .sidebar:hover {
+            left: 0;
+            box-shadow: 5px 0 20px rgba(0, 255, 136, 0.2);
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -30px;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            clip-path: polygon(100% 50%, 0 0, 0 100%);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 0 8px var(--primary));
+            animation: arrowPulse 2s infinite;
+        }
+
+        @keyframes arrowPulse {
+            0% { filter: drop-shadow(0 0 8px var(--primary)); }
+            50% { filter: drop-shadow(0 0 15px var(--primary)); }
+            100% { filter: drop-shadow(0 0 8px var(--primary)); }
+        }
+
+        .sidebar:hover::before {
+            right: 10px;
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        .sidebar h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            text-shadow: 0 0 10px var(--primary);
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .sidebar h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 2px;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .sidebar a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            padding: 0.8rem 1rem;
+            border-radius: var(--border-radius);
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid rgba(0, 255, 136, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(0, 255, 136, 0.2),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .sidebar a:hover {
+            color: var(--text);
+            background: rgba(0, 255, 136, 0.15);
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+            transform: translateX(5px);
+        }
+
+        .sidebar a:hover::before {
+            left: 100%;
+        }
+
+        .content {
+            margin-left: 0;
+            width: 100%;
+            transition: margin-left 0.3s ease;
+        }
+
+        .sidebar:hover ~ .content {
+            margin-left: 220px;
+            width: calc(100% - 220px);
+        }
+
+        .input-container textarea {
+            transition: height 0.5s ease-in-out, background-color 0.5s ease-in-out;
+        }
+
+        .input-container textarea:focus {
+            height: 300px;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .input-container textarea:focus ~ .text-box,
+        .input-container textarea:focus ~ input {
+            filter: blur(4px);
+        }
+
+        .online-users {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(30, 30, 30, 0.8);
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+            border: 1px solid rgba(0, 255, 136, 0.1);
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        @keyframes cursorBlink {
+            0%, 100% { border-right-color: transparent; }
+            50% { border-right-color: var(--primary); }
+        }
+
+        @keyframes typingGlow {
+            0% { box-shadow: 0 0 5px var(--primary); }
+            50% { box-shadow: 0 0 15px var(--primary); }
+            100% { box-shadow: 0 0 5px var(--primary); }
+        }
+
+        textarea {
+            border-right: 2px solid var(--primary);
+            animation: cursorBlink 1s infinite;
+            transition: all 0.3s ease-in-out;
+        }
+
+        textarea:focus {
+            animation: 
+                cursorBlink 1s infinite,
+                typingGlow 2s infinite;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.1),
+                rgba(0, 255, 136, 0.05)
+            );
+            backdrop-filter: blur(5px);
+            transform: translateY(-2px);
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        textarea::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: var(--primary);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            animation: ripple 1s infinite;
+        }
+
+        .typing-feedback {
+            position: absolute;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        input#typing-area {
+            position: relative;
+            overflow: hidden;
+            animation: cursorBlink 1s infinite;
+        }
+
+        input#typing-area:focus {
+            animation: 
+                cursorBlink 1s infinite,
+                typingGlow 2s infinite;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.1),
+                rgba(0, 255, 136, 0.05)
+            );
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes flashRed {
+            0% { color: var(--error); text-shadow: 0 0 5px var(--error); }
+            50% { color: var(--text); text-shadow: none; }
+            100% { color: var(--error); text-shadow: 0 0 5px var(--error); }
+        }
+
+        .flash-red {
+            animation: flashRed 0.5s;
+        }
+
+        @keyframes flyUp {
+            0% { transform: translateY(0); }
+             100% { transform: translateY(-5px); }
+        }
+
+        .fly-up {
+            animation: flyUp 0.5s forwards;
+        }
+
+        .word.correct {
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .word.incorrect {
+            color: var(--error);
+            text-shadow: 0 0 10px var(--error);
+        }
+
+        .icon-container {
+            display: none;
+        }
+
+        .popup-window {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <h1>Send Location</h1>
-    <button onclick="sendLocation()">Send My Location</button>
+    <div class="background-animation"></div>
+    <div class="clock-container">
+        <i class="weather-icon fas fa-sun"></i>
+        <div class="clock" id="clock">00:00:00</div>
+    </div>
+    <div class="sidebar">
+        <h1>AZOTA</h1>
+        <a href="https://azota.vn/de-thi/rsjvxe">Sinh Học</a>
+        <a href="https://azota.vn/vi/de-thi/3n8n6o">GDKT-PL</a>
+        <a href="https://azota.vn/de-thi/k3qwx7 ">Lịch Sử</a>
+    </div>
+    <div class="content">
+        <header>
+            <h1>Luyện Tự Luận</h1>
+            <p>Thi Cuối Kỳ I</p>
+        </header>
+        <div class="card">
+            <div class="input-container">
+                <textarea id="input-text" placeholder="Đưa văn bản tự luận của bạn vào đây..."></textarea>
+                <div id="text-to-type" class="text-box">
+                    <button id="toggle-blur" class="toggle-blur">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <input id="typing-area" placeholder="Viết ở đây...">
+            </div>
+            <div class="button-container">
+                <button id="reset-button" class="button">Reset</button>
+            </div>
+        <footer>
+            <p>&copy; 2024 Ôn tập thi cuối kỳ</p>
+        </footer>
+    </div>
 
-<script>
-    function sendLocation() {
-        console.log("Button clicked");
-        if ("geolocation" in navigator) {
-            console.log("Geolocation is available");
-            navigator.geolocation.getCurrentPosition(function(position) {
-                const latitude = position.coords.latitude;
-                const longitude = position.coords.longitude;
-                console.log("Position obtained:", latitude, longitude);
+    <script>
+        const inputText = document.getElementById('input-text');
+        const textToType = document.getElementById('text-to-type');
+        const typingArea = document.getElementById('typing-area');
+        const resetButton = document.getElementById('reset-button');
+        const toggleBlurButton = document.getElementById('toggle-blur');
 
-                fetch('http://117.7.116.182:3000/location', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ latitude, longitude }),
-                })
-                .then(response => {
-                    console.log("Response status:", response.status);
-                    return response.json();
-                })
-                .then(data => console.log('Success:', data))
-                .catch((error) => console.error('Error:', error));
-            }, function(error) {
-                console.error("Error getting position:", error.message);
-            });
-        } else {
-            console.log("Geolocation is not supported by this browser.");
+        let lines = [];
+        let isBlurred = false;
+        let currentLineIndex = 0;
+        let currentWords = [];
+        let correctWords = 0;
+        let totalWords = 0;
+
+        inputText.addEventListener('input', () => {
+            lines = inputText.value.split('\n').map(line => line.trim());
+            currentLineIndex = 0;
+            correctWords = 0;
+            totalWords = 0;
+            showCurrentLine();
+            typingArea.value = '';
+            updateAccuracy();
+        });
+
+        typingArea.addEventListener('keydown', (e) => {
+            if (e.key === ' ') {
+                e.preventDefault();
+                const typedWord = typingArea.value.trim().replace(/[.,'"()!?=;:-_]/g, '').toLowerCase();
+                const targetWord = (currentWords[totalWords] || '').replace(/[.,'"()!?=;:-_]/g, '').toLowerCase();
+
+                if (typedWord.length > 0) {
+                    const wordSpan = document.querySelector(`.word[data-index="${totalWords}"]`);
+                    if (typedWord === targetWord) {
+                        correctWords++;
+                        wordSpan.classList.add('correct', 'fly-up');
+                    } else {
+                        wordSpan.classList.add('incorrect', 'flash-red');
+                    }
+
+                    totalWords++;
+                    typingArea.value = '';
+
+                    if (totalWords >= currentWords.length) {
+                        currentLineIndex++;
+                        if (currentLineIndex < lines.length) {
+                            totalWords = 0;
+                            showCurrentLine();
+                        }
+                    }
+                    updateAccuracy();
+                }
+
+                const lastCharIndex = typingArea.value.length - 1;
+                if (lastCharIndex >= 0) {
+                    const lastChar = typingArea.value[lastCharIndex];
+                    const span = document.createElement('span');
+                    span.textContent = lastChar;
+                    span.classList.add('shake');
+                    typingArea.value = typingArea.value.slice(0, -1);
+                    typingArea.appendChild(span);
+                    setTimeout(() => span.remove(), 500);
+                }
+            }
+        });
+
+        function showCurrentLine() {
+            textToType.innerHTML = '<button id="toggle-blur" class="toggle-blur"><i class="fas fa-eye"></i></button>';
+            if (currentLineIndex < lines.length) {
+                const line = lines[currentLineIndex];
+                currentWords = line.split(/\s+/).filter(word => word.length > 0);
+                
+                const lineContainer = document.createElement('div');
+                lineContainer.style.marginBottom = '1rem';
+                
+                currentWords.forEach((word, index) => {
+                    const wordSpan = document.createElement('span');
+                    wordSpan.textContent = word;
+                    wordSpan.classList.add('word');
+                    wordSpan.dataset.index = index;
+                    
+                    if (index < currentWords.length - 1) {
+                        wordSpan.textContent += ' ';
+                    }
+                    
+                    lineContainer.appendChild(wordSpan);
+                });
+                
+                textToType.appendChild(lineContainer);
+            }
+
+            document.getElementById('toggle-blur').addEventListener('click', toggleBlur);
         }
-    }
-</script>
+
+        function resetPractice() {
+            currentLineIndex = 0;
+            correctWords = 0;
+            totalWords = 0;
+            const allWords = document.querySelectorAll('.word');
+            allWords.forEach(word => {
+                word.classList.remove('correct', 'incorrect', 'fly-up', 'flash-red');
+            });
+            showCurrentLine();
+            typingArea.value = '';
+            updateAccuracy();
+        }
+
+        resetButton.addEventListener('click', resetPractice);
+
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+            
+            const weatherIcon = document.querySelector('.weather-icon');
+            if (hours >= 6 && hours < 18) {
+                weatherIcon.className = 'weather-icon fas fa-sun';
+            } else {
+                weatherIcon.className = 'weather-icon fas fa-moon';
+            }
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function toggleBlur() {
+            isBlurred = !isBlurred;
+            inputText.classList.toggle('blur-text');
+            textToType.classList.toggle('blur-text');
+            toggleBlurButton.innerHTML = isBlurred ? 
+                '<i class="fas fa-eye-slash"></i>' : 
+                '<i class="fas fa-eye"></i>';
+        }
+
+        toggleBlurButton.addEventListener('click', toggleBlur);
+
+        showCurrentLine();
+
+        typingArea.addEventListener('input', (e) => {
+            if (e.target.value) {
+                const feedback = document.createElement('div');
+                feedback.className = 'typing-feedback';
+                feedback.style.left = `${e.target.selectionStart * 8}px`;
+                feedback.style.top = `${e.target.offsetTop - 20}px`;
+                feedback.style.animation = 'typingGlow 0.5s ease-out forwards';
+                document.body.appendChild(feedback);
+                setTimeout(() => feedback.remove(), 500);
+            }
+        });
+
+        inputText.addEventListener('scroll', () => {
+            requestAnimationFrame(() => {
+                const scrollProgress = inputText.scrollTop / (inputText.scrollHeight - inputText.clientHeight);
+                const glowIntensity = Math.min(20, scrollProgress * 30);
+                inputText.style.boxShadow = `0 0 ${glowIntensity}px var(--primary)`;
+            });
+        });
+    </script>
 </body>
 </html>
